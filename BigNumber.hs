@@ -1,3 +1,4 @@
+module BigNumber (BigNumber, scanner, output, somaBN, subBN, mulBN, divBN) where
 import Prelude
 import Data.Char (digitToInt, intToDigit)
 
@@ -59,6 +60,22 @@ maior a b | length (snd a) > length (snd b) = a
           | length (snd a) < length (snd b) = b
           | otherwise = if maiorsame a b == 1 then a else b
 
+listSpliter :: Int -> [Int]
+listSpliter 0 = []
+listSpliter a = listSpliter (div a 10) ++ [mod a 10]
+
+divLista :: [Int] -> [Int] -> [Int]
+divLista a [] = []
+divLista [] b = []
+divLista [a] [b] = [div a b]
+divLista (a:as) [b] | a>b = listSpliter(div a b) ++ divLista (a`mod`b:as) [b]
+                    | otherwise = divLista ((a*10+head as):tail as) [b]
+
+divListaMany :: [Int] -> [Int] -> [Int]
+divListaMany a [] = []
+divListaMany a [b] = divLista a [b]
+divListaMany a (b:bs) = divListaMany a ((b*10+head bs) : tail bs)
+
 somaBN :: BigNumber -> BigNumber -> BigNumber
 somaBN a b | fst a == '+' && fst b == '+' = ('+', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
            | fst a == '-' && fst b == '-' = ('-', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
@@ -77,5 +94,5 @@ mulBN :: BigNumber -> BigNumber -> BigNumber
 mulBN a b | fst a == fst b = ('+', reverse (mulAdd (reverse (mulLista (reverse (snd a)) (reverse (snd b))))))
           | otherwise = ('-', reverse (mulAdd (reverse (mulLista (reverse (snd a)) (reverse (snd b))))))
 
-
-
+divBN :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
+divBN a b = let res = ('+',divListaMany (snd a) (snd b)) in (res,subBN a (mulBN res b))
