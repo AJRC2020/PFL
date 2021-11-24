@@ -5,7 +5,7 @@ import Data.Char (digitToInt, intToDigit)
 type BigNumber = (Char , [Int])
 
 scanner :: String -> BigNumber
-scanner a | head a == '-' = ('-', map digitToInt (drop 1 a)) 
+scanner a | head a == '-' = ('-', map digitToInt (drop 1 a))
           | otherwise = ('+', map digitToInt a)
 
 output :: BigNumber -> String
@@ -15,7 +15,7 @@ output a | fst a == '-' = '-' : map intToDigit (snd a)
 
 somaCheck :: [Int] -> [Int]
 somaCheck [x] | x < 10 = [x]
-              | otherwise = [x `mod` 10, x `div` 10] 
+              | otherwise = [x `mod` 10, x `div` 10]
 somaCheck (x:xs) | x < 10 = x : somaCheck xs
                  | otherwise = x `mod` 10 : somaCheck (head xs + x `div` 10 : drop 1 xs)
 
@@ -42,23 +42,33 @@ addZeros :: [Int] -> Int -> [Int]
 addZeros a 0 = a
 addZeros a n = 0 : addZeros a (n-1)
 
+takeZeros :: [Int] -> [Int]
+takeZeros [a] =     if a == 0 then [a] else []
+takeZeros (a:as) =  if a == 0 then takeZeros(as)
+                    else a:as
+
 mulAdd :: [[Int]] -> [Int]
 mulAdd [] = [0]
 mulAdd (x:xs) = somaCheck (somaLista (addZeros x (length xs)) (mulAdd xs))
 
 mulLista :: [Int] -> [Int] -> [[Int]]
-mulLista a = map (\b -> somaCheck (map (*b) a)) 
+mulLista a = map (\b -> somaCheck (map (*b) a))
 
 maiorsame :: BigNumber -> BigNumber -> Int
-maiorsame (_, []) (_, []) = 1
+maiorsame (_, []) (_, []) = 0
 maiorsame (a, b:bs) (c, d:ds) | b > d = 1
                               | b < d = 2
-                              | otherwise = maiorsame (a, bs) (c, ds) 
+                              | otherwise = maiorsame (a, bs) (c, ds)
 
 maior :: BigNumber -> BigNumber -> BigNumber
 maior a b | length (snd a) > length (snd b) = a
           | length (snd a) < length (snd b) = b
-          | otherwise = if maiorsame a b == 1 then a else b
+          | otherwise = if maiorsame a b == 1 || maiorsame a b == 0 then a else b
+
+menor :: BigNumber -> BigNumber -> Int
+menor a b | length (snd a) > length (snd b) = 1
+          | length (snd a) < length (snd b) = 2
+          | otherwise = maiorsame a b
 
 listSpliter :: Int -> [Int]
 listSpliter 0 = []
@@ -76,6 +86,16 @@ divListaMany a [] = []
 divListaMany a [b] = divLista a [b]
 divListaMany a (b:bs) = divListaMany a ((b*10+head bs) : tail bs)
 
+divSub :: BigNumber -> BigNumber -> BigNumber
+divSub a b  | menor a b == 2 = ('+',[0])
+            | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
+
+divSubRest :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
+divSubRest a b =(q, subBN a (mulBN q b)) where q = ('+',reverse (snd (divSub a b)))
+
+factorial :: Int -> BigNumber
+factorial n = scanner (show (product [1..n]))
+
 somaBN :: BigNumber -> BigNumber -> BigNumber
 somaBN a b | fst a == '+' && fst b == '+' = ('+', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
            | fst a == '-' && fst b == '-' = ('-', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
@@ -85,10 +105,10 @@ somaBN a b | fst a == '+' && fst b == '+' = ('+', reverse (somaCheck (somaLista 
 subBN :: BigNumber -> BigNumber -> BigNumber
 subBN a b | fst a == '+' && fst b == '-' = ('+', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
           | fst a == '-' && fst b == '+' = ('-', reverse (somaCheck (somaLista (reverse (snd a)) (reverse (snd b)))))
-          | fst a == '+' && fst b == '+' && maior a b == a = ('+', reverse (subCheck (subLista (reverse (snd a)) (reverse (snd b)))))
-          | fst a == '+' && fst b == '+' && maior a b == b = ('-', reverse (subCheck (subLista (reverse (snd b)) (reverse (snd a)))))
-          | fst a == '-' && fst b == '-' && maior a b == a = ('-', reverse (subCheck (subLista (reverse (snd a)) (reverse (snd b)))))
-          | fst a == '-' && fst b == '-' && maior a b == b = ('+', reverse (subCheck (subLista (reverse (snd b)) (reverse (snd a)))))
+          | fst a == '+' && fst b == '+' && maior a b == a = ('+', takeZeros (reverse (subCheck (subLista (reverse (snd a)) (reverse (snd b))))))
+          | fst a == '+' && fst b == '+' && maior a b == b = ('-', takeZeros (reverse (subCheck (subLista (reverse (snd b)) (reverse (snd a))))))
+          | fst a == '-' && fst b == '-' && maior a b == a = ('-', takeZeros (reverse (subCheck (subLista (reverse (snd a)) (reverse (snd b))))))
+          | fst a == '-' && fst b == '-' && maior a b == b = ('+', takeZeros (reverse (subCheck (subLista (reverse (snd b)) (reverse (snd a))))))
 
 mulBN :: BigNumber -> BigNumber -> BigNumber
 mulBN a b | fst a == fst b = ('+', reverse (mulAdd (reverse (mulLista (reverse (snd a)) (reverse (snd b))))))
