@@ -43,9 +43,11 @@ addZeros a 0 = a
 addZeros a n = 0 : addZeros a (n-1)
 
 takeZeros :: [Int] -> [Int]
-takeZeros [a] =     if a == 0 then [a] else []
-takeZeros (a:as) =  if a == 0 then takeZeros(as)
-                    else a:as
+takeZeros [] = [0]
+-- takeZeros [a]       | a == 0  = []
+--                     | otherwise = [a]
+takeZeros (a:as)    | a == 0  = takeZeros as
+                    | otherwise = a:as
 
 mulAdd :: [[Int]] -> [Int]
 mulAdd [] = [0]
@@ -91,7 +93,7 @@ divSub a b  | menor a b == 2 = ('+',[0])
             | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
 
 divSubRest :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
-divSubRest a b =(q, subBN a (mulBN q b)) where q = ('+',reverse (snd (divSub a b)))
+divSubRest a b =(q, subBN a (mulBN q b)) where q = divSub a b
 
 factorial :: Int -> BigNumber
 factorial n = scanner (show (product [1..n]))
