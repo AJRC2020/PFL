@@ -92,6 +92,11 @@ divSub :: BigNumber -> BigNumber -> BigNumber
 divSub a b  | menor a b == 2 = ('+',[0])
             | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
 
+-- divSub2 :: BigNumber -> BigNumber -> BigNumber
+-- divSub2 a b = aux a b delta where
+--     aux a b delta   | menor a b == 2 = ('+',[0])
+--                     | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
+
 divSubRest :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
 divSubRest a b =(q, subBN a (mulBN q b)) where q = divSub a b
 
