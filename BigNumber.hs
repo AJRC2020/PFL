@@ -1,4 +1,4 @@
-module BigNumber (BigNumber, scanner, output, somaBN, subBN, mulBN, divBN) where
+module BigNumber (BigNumber, scanner, output, somaBN, subBN, mulBN, divBN, safeDivBN) where
 import Prelude
 import Data.Char (digitToInt, intToDigit)
 
@@ -9,8 +9,8 @@ scanner a | head a == '-' = ('-', map digitToInt (drop 1 a))
           | otherwise = ('+', map digitToInt a)
 
 output :: BigNumber -> String
-output a | fst a == '-' = '-' : map intToDigit (snd a)
-         | otherwise = map intToDigit (snd a)
+output a | fst a == '-' = '-' : map intToDigit (takeZeros(snd a))
+         | otherwise = map intToDigit (takeZeros(snd a))
 
 
 somaCheck :: [Int] -> [Int]
@@ -118,3 +118,7 @@ mulBN a b | fst a == fst b = ('+', reverse (mulAdd (reverse (mulLista (reverse (
 
 divBN :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
 divBN a b = let res = ('+',divListaMany (snd a) (snd b)) in (res,subBN a (mulBN res b))
+
+safeDivBN :: BigNumber -> BigNumber -> Maybe (BigNumber, BigNumber)
+safeDivBN a b | output b == "0" = Nothing 
+              | otherwise = Just (divBN a b)
