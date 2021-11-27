@@ -24,17 +24,17 @@
     - fibListaInfinita 100000 é mais rápido que fibLista sendo este a função mais eficiente
 
 4. ### fibRecBN, fibListaBN, fibListaInfinitaBN:
-    Esta função é uma adaptação de fibRec que utiliza BigNumber. Exemplos:
+    Estas funções são adaptações de fibRec, fibLista e fibListaInfinita que utilizam BigNumber. Exemplos:
     - fibRecBN 10 = ('+', [5, 5])
     - fibRecBN 30 = ('+', [8, 3, 2, 0, 4, 0]), demora mais tempo que fibRec
     - fibListaBN 7 = ('+', [1, 3])
-    - fiListaBN 100000 demora mais tempo que fibLista
+    - fiListaBN demora mais tempo que fibLista para indices altos
     - fibListaInfinitaBN 12 = ('+', [1, 4, 4])
-    - fibListaInfinitaBN 100000 demora mais tempo que fibListaInfinita
-    - Concluindo, BN torna mais lento o processamento de fibonacci de ordem n
+    - fibListaInfinitaBN demora mais tempo que fibListaInfinita para indices altos
+    - Concluindo, apesar de BN teóricamente aceitar números arbitrariamente grandes, na prática torna mais lento o processamento de fibonacci de ordem n
 
 5. ### Resposta pergunta 4:
-    Como BigNumber é uma lista de Int, o tamanho individual de um elemento corresponde ao de um Int e Integer. Por isso, os BigNumbers serão melhores para valores mais elevados.
+    Como BigNumber é uma lista de Int, o tamanho individual de um algarismo corresponde ao de um Int. Por isso, quando comparado ao tipo Int, BigNumber permite às funções calcular elementos de fibonacci de ordem mais elevada, restringido apenas pelo tempo de processamento, enquanto que as mesmas funções do tipo Int só podem no máximo processar até cerca do indice 92 antes de passarem a sofrer de Overflow. O tipo Integer por ser um tipo de precisão arbitrária em Haskeel não sofre do mesmo problema que o Int.
 
 
 
@@ -72,10 +72,11 @@
     - mulBN ('+', [3, 4, 5]) ('+', [0]) = ('+', [0, 0, 0])
 
 6. ### divBN:
-    Calcula o quociente e o resto entre 2 BigNumbers. O sinal do resultado é sempre positivo. O quociente calcula-se usando a função auxiliar divListaMany que transforma o 2º operando num int. Quando chega ao último elemento da lista chama divLista que vai juntado os dígitos do 1º operando até este ser maior que o segundo, aonde divide o número atual do 1º pelo 2º e continua para o próximo elemento da 1ª lista. O resto é calculado multiplicando o quociente pelo 2º operando e, seguidamente, subtraindo-lo do 1º operando. Exemplos:
+    Calcula o quociente e o resto entre 2 BigNumbers. O sinal do resultado é sempre positivo. O quociente calcula-se usando a função auxiliar divSub2 que calcula a divisão através de subtrações sucessivas. Através do calculo da diferença na ordem de grandeza entre os operandos é capaz de diminuir o número de ciclos necessários para chegar à resposta.  Exemplos:
     - divBN ('+', [2, 3, 4]) ('+', [3, 4]) = ( ('+', [6]), ('+', [3, 0]) )
-    - divBN ('+', [2, 3, 4, 4, 7]) ('+', [3, 4]) = ( ('+', [6, 7, 8]), ('+', [2, 1]) )
+    - divBN ('+', [2, 3, 4, 4, 7]) ('+', [3, 4]) = ( ('+', [6, 8, 9]), ('+', [2, 1]) )
     - divBN ('+', [2, 3, 4]) ('+', [3, 4, 6]) = ( ('+', [0]), ('+', [2, 3, 4]) )
+    - divBN ('+', [2, 3, 5, 4, 6, 8, 5, 4, 2]) ('+', [3, 4, 2, 5, 4, 6]) = ( ('+',[6, 8, 7]), ('+',[1, 3, 9, 4, 4, 0]) )
 
 7. ### safeDivBN:
     Uma adaptação do divBN que utiliza o monad Maybe para garantir que não aconteça nenhum erro caso o 2º operando seja zero. Se o segundo operando é "0" então retorna _Nothing_, caso contrário, retorna _Just_ divBN. Exemplos:

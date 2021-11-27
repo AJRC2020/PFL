@@ -7,7 +7,7 @@ fibRec 0 = 0
 fibRec 1 = 1
 fibRec n = fibRec (n-1) + fibRec(n-2)
 
-fibLista :: (Integral a) => a -> a
+fibLista :: Int -> Int
 fibLista n = go n (0, 1)
     where
         go n (a, b) | n == 0 = a

@@ -92,10 +92,19 @@ divSub :: BigNumber -> BigNumber -> BigNumber
 divSub a b  | menor a b == 2 = ('+',[0])
             | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
 
--- divSub2 :: BigNumber -> BigNumber -> BigNumber
--- divSub2 a b = aux a b delta where
---     aux a b delta   | menor a b == 2 = ('+',[0])
---                     | otherwise = somaBN ('+',[1]) (divSub (subBN a b) b)
+lengthDif :: BigNumber -> BigNumber -> [Int]
+lengthDif a b   | menor a b == 2 =  [1]
+                |otherwise  = aux (length (snd a) - length (snd b)) where
+                    aux 0 = [1]
+                    aux n = 1 : replicate (n-1) 0
+
+
+divSub2 :: BigNumber -> BigNumber -> BigNumber
+divSub2 a b = aux a b ('+',lengthDif a b) where
+    aux a b ('+',[1])   | menor a b == 2 = ('+',[0])
+                        | otherwise = somaBN ('+',[1]) (aux (subBN a b) b ('+',[1]))
+    aux a b delta       | menor a (mulBN b delta) == 2 = aux a b ('+', init (snd delta))
+                        | otherwise = somaBN delta (aux (subBN a (mulBN delta b)) b delta)
 
 divSubRest :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
 divSubRest a b =(q, subBN a (mulBN q b)) where q = divSub a b
@@ -122,8 +131,8 @@ mulBN a b | fst a == fst b = ('+', reverse (mulAdd (reverse (mulLista (reverse (
           | otherwise = ('-', reverse (mulAdd (reverse (mulLista (reverse (snd a)) (reverse (snd b))))))
 
 divBN :: BigNumber -> BigNumber -> (BigNumber, BigNumber)
-divBN a b = let res = ('+',divListaMany (snd a) (snd b)) in (res,subBN a (mulBN res b))
+divBN a b = let res = divSub2 a b in (res, subBN a (mulBN res b))
 
 safeDivBN :: BigNumber -> BigNumber -> Maybe (BigNumber, BigNumber)
-safeDivBN a b | output b == "0" = Nothing 
+safeDivBN a b | output b == "0" = Nothing
               | otherwise = Just (divBN a b)
