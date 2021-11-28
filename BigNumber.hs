@@ -55,11 +55,12 @@ takeZeros [] = [0]
 takeZeros (a:as)    | a == 0  = takeZeros as
                     | otherwise = a:as
 
-
+-- adds all lists in a list of lists
 mulAdd :: [[Int]] -> [Int]
 mulAdd [] = [0]
 mulAdd (x:xs) = somaCheck (somaLista (addZeros x (length xs)) (mulAdd xs))
 
+-- multiplies the first list by each element of the second list, returning all resulting lists 
 mulLista :: [Int] -> [Int] -> [[Int]]
 mulLista a = map (\b -> somaCheck (map (*b) a))
 
