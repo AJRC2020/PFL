@@ -10,7 +10,7 @@ play :-
 play(1) :-
     initial_state(GameState),
     display_game(10,GameState,1), !.
-    % game_cycle(GameState,Player).
+    % game_cycle(GameState-Player).
 
 play(_):- 
     display_clear,
@@ -18,7 +18,7 @@ play(_):-
 
 
 game_cycle(GameState-Player):-
-    game_over(GameState, Winner), !,
+    game_over(GameState, Player), !,
     congratulate(Winner).
 game_cycle(GameState-Player):-
     choose_move(GameState, Player, Move),
@@ -27,9 +27,6 @@ game_cycle(GameState-Player):-
     display_game(GameState-NextPlayer), !,
     game_cycle(NewGameState-NextPlayer).
 
-% move(+GameState, +Move, -NewGameState)
-% Validação e execução de uma jogada, obtendo o novo estado do jogo
-% move(GameState, Move, NewGameState).
 
 % game_over(+GameState, -Winner)
 % Verificação da situação de fim do jogo, com identificação do vencedor

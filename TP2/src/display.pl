@@ -58,6 +58,9 @@ display_piece(N, GameState):-
 display_piece(_,_):-
     write(' ').
 
+write_piece_symbol(r):-write('X').
+write_piece_symbol(b):-write('O').
+
 display_clear :- write('\33\[2J').
 
 display_start_screen :-
@@ -107,5 +110,16 @@ display_start_menu_error(_) :-
     skip_line,
     fail.
 
-write_piece_symbol(r):-write('X').
-write_piece_symbol(b):-write('O').
+congratulate(Winner):-
+    display_clear,
+    write('******************************************************'), nl,
+    write('*        *   *  *****  *   *  *****  ****   *        *'), nl,
+    write('*        *   *    *    **  *  *      *   *  *        *'), nl,
+    write('*        * * *    *    * * *  ***    ****   *        *'), nl,
+    write('*        ** **    *    *  **  *      *  *            *'), nl,
+    write('*        *   *  *****  *   *  *****  *   *  *        *'), nl,
+    write('*                                                    *'), nl,
+   format('*              Congratulations Player ~d!             *',Winner), nl,
+    write('*                       You Won !                    *'), nl,
+    write('*                                                    *'), nl,
+    write('******************************************************').
