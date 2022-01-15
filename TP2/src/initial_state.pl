@@ -1,5 +1,6 @@
 :- use_module(library(lists)).
 
+board_1(G):- append([r-0-10,b-0-0],[],G).
 
 % initial_state(+Size, -GameState)
 % Devolve o estado inicial do jogo, assume um tabuleiro quadrado com largura mínima de 10.

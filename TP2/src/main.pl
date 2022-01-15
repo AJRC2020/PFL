@@ -19,6 +19,7 @@ play(_):-
 
 game_cycle(GameState-Player):-
     game_over(GameState, Player), !,
+    Winner is (Player mod 2) + 1,
     congratulate(Winner).
 game_cycle(GameState-Player):-
     choose_move(GameState, Player, Move),
