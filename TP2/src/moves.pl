@@ -1,4 +1,15 @@
-% valid_moves(+GameState, -ListOfMoves)
+:- use_module(library(lists)).
+
+
+
+% move(+GameState, +Move, -NewGameState)
+% Validação e execução de uma jogada, obtendo o novo estado do jogo
+move(GameState, Move, NewGameState):-
+    select(From-To,Move,_),
+    select(C-I-From,GameState,Rest),
+    append(Rest,[C-I-To], NewGameState).
+
+% valid_moves(+GameState, -ListOfMoves, +PLayer)
 % Obtenção de lista com jogadas possíveis
 valid_moves(GameState, ListOfMoves,1):-
     create_move_list(GameState, ListOfMoves, [], r,0).
@@ -14,12 +25,6 @@ create_move_list(GameState,ListOfMoves,List,Player,Index):-
     Index1 is Index + 1,
     create_move_list(GameState,ListOfMoves,List1,Player,Index1).
 
-% move(+GameState, +Move, -NewGameState)
-% Validação e execução de uma jogada, obtendo o novo estado do jogo
-% move(GameState, Move, NewGameState):-
-    % if move not ok, !, NewGameState is GameState.
-% move(GameState, Move, NewGameState):-
-    % if ok, actually change NewGameState.
 
 check_move(GameState,C-_-N,List):-
     check_move_up(GameState,C-_-N,L1),
@@ -76,7 +81,7 @@ check_move_validity(GameState,C-_-N, Pos):-
     \+ select(_-_-Pos,GameState,_),
     check_value(C-_-N,GameState,Value1),
     check_value(C-_-Pos,GameState,Value2),
-    Value2 > Value1.
+    Value2 > Value1 + 1.
 
 check_value(C-_-N,GameState, Value):-
     check_value_up(C-_-N,GameState,Value1),
@@ -130,3 +135,12 @@ check_color(C,C,Value,Old):-
 
 check_color(_,_,Value,Old):-
     Value is Old - 1.
+
+
+% game_over(+GameState, -Winner)
+% Verificação da situação de fim do jogo, com identificação do vencedor
+game_over(GameState, Player):-
+    fail,
+    valid_moves(GameState,List,Player),
+    \+ select(_-_,List,_).
+

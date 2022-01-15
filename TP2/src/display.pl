@@ -1,4 +1,4 @@
-:- ensure_loaded(display).
+:- ensure_loaded(moves).
 
 
 % display_game(+GameState)
@@ -63,6 +63,7 @@ write_piece_symbol(b):-write('O').
 
 display_clear :- write('\33\[2J').
 
+
 display_start_screen :-
     display_clear,
     write('******************************************************'), nl,
@@ -123,3 +124,24 @@ congratulate(Winner):-
     write('*                       You Won !                    *'), nl,
     write('*                                                    *'), nl,
     write('******************************************************').
+
+pick_move(GameState, Player, Move):-
+    repeat,
+    valid_moves(GameState,ListOfMoves,Player),
+    write('The following list contains the pairs of positions From-To that you can choose to move:'),nl,
+    write(ListOfMoves),nl,
+    write('Pick a pair of positons for your move (eg. 22-12): '),
+    read(From-To),
+    skip_line,
+    pick_move_error(From-To,ListOfMoves,GameState,Player),
+    append([],[From-To],Move).
+
+pick_move_error(From-To, ListOfMoves,_,_):-
+    select(From-To,ListOfMoves,_),!.
+pick_move_error(_-_,_,GameState,Player):-
+    write('Sorry, invalid move.'),nl,
+    write('Press Enter and try again: '),
+    skip_line,
+    display_game(10,GameState,Player),
+    fail.
+
