@@ -1,11 +1,10 @@
 :- use_module(library(lists)).
-
+:- use_module(library(random)).
 
 
 % move(+GameState, +Move, -NewGameState)
 % Validação e execução de uma jogada, obtendo o novo estado do jogo
-move(GameState, Move, NewGameState):-
-    select(From-To,Move,_),
+move(GameState, From-To, NewGameState):-
     select(C-I-From,GameState,Rest),
     append(Rest,[C-I-To], NewGameState).
 
@@ -140,7 +139,35 @@ check_color(_,_,Value,Old):-
 % game_over(+GameState, -Winner)
 % Verificação da situação de fim do jogo, com identificação do vencedor
 game_over(GameState, Player):-
-    fail,
     valid_moves(GameState,List,Player),
     \+ select(_-_,List,_).
 
+% choose_move(+GameState, +Level, -Move)
+% Escolha da jogada a efetuar pelo computador, dependendo do nível de dificuldade
+choose_move(GameState, 1, Move, Player):-
+    valid_moves(GameState, Moves, Player),
+    random_select(Move, Moves, _).
+choose_move(GameState, 2, Move, Player):-
+    valid_moves(GameState, Moves, Player),
+    best_move(Move, GameState, Moves, Player).
+
+
+% value(+GameState, +Move, -Value)
+% Forma(s) de avaliação do estado do jogo do ponto de vista de um jogador
+value(GameState, From-To, Value):-
+    select(C1-N1-From,GameState,Rest),
+    check_value(C1-N1-From, GameState, Value1),
+    move(GameState, From-To, NewGameState),
+    select(C2-N2-To, NewGameState, Rest),
+    check_value(C2-N2-To, NewGameState, Value2),
+    Value is Value2 - Value1.
+
+best_move(Move, GameState, Moves, Player):-
+    best_move(Move, GameState, Moves, 1000, _, Player).
+best_move(Move, _, [], _, Move, _).
+best_move(Move, GameState, [H|T], Min, _, Player):-
+    value(GameState, H, Value),
+    Value < Min, !,
+    best_move(Move, GameState, T, Value, H, Player).
+best_move(Move, GameState, [_|T], Min, CurrentMove, _):-
+    best_move(Move, GameState, T, Min, CurrentMove, _).
