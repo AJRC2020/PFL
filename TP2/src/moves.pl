@@ -11,10 +11,10 @@ move(GameState, From-To, NewGameState):-
 % valid_moves(+GameState, -ListOfMoves, +PLayer)
 % Obtenção de lista com jogadas possíveis
 valid_moves(GameState, ListOfMoves,1):-
-    create_move_list(GameState, ListOfMoves, [], r,0).
+    create_move_list(GameState, ListOfMoves, [], r,0),!.
 
 valid_moves(GameState, ListOfMoves,2):-
-    create_move_list(GameState, ListOfMoves, [], b,0).
+    create_move_list(GameState, ListOfMoves, [], b,0),!.
 
 create_move_list(_, ListOfMoves,ListOfMoves, _,16):-!.
 create_move_list(GameState,ListOfMoves,List,Player,Index):-
