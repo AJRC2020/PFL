@@ -2,7 +2,7 @@
 :- use_module(library(random)).
 
 
-% move(+GameState, +Move, -NewGameState)
+% move(+GameState, +From-To, -NewGameState)
 % Execução de uma jogada, obtendo o novo estado do jogo
 move(GameState, From-To, NewGameState):-
     select(C-I-From,GameState,Rest),
@@ -122,6 +122,9 @@ check_value_down(C-_-N,GameState, Value):-
     select(Color-_-Pos,GameState,_),
     check_color(C,Color,Value,0).
 
+check_value_left(_-_-N,_, Value):-
+    N mod 10 < 1,!,
+    Value is 0.
 check_value_left(_-_-N,GameState, Value):-
     Pos is N-1,
     \+ select(_-_-Pos,GameState,_),!,
@@ -132,6 +135,9 @@ check_value_left(C-_-N,GameState, Value):-
     select(Color-_-Pos,GameState,_),
     check_color(C,Color,Value,0).
 
+check_value_right(_-_-N,_, Value):-
+    N mod 10 > 8,!,
+    Value is 0.
 check_value_right(_-_-N,GameState, Value):-
     Pos is N+1,
     \+select(_-_-Pos,GameState,_),!,
@@ -168,8 +174,8 @@ choose_move(GameState, 2, Move, Player):-
 
 
 % value(+GameState, +Move, -Value)
-% Forma(s) de avaliação do estado do jogo do ponto de vista de um jogador
-value(GameState, From-To, Value):-
+% Forma(s) de avaliação do estado do jogo do ponto de vista de um jogador calculando o aumento de valor de uma peça após uma jogada
+evaluate_move(GameState, From-To, Value):-
     select(C1-N1-From,GameState,Rest),
     check_value(C1-N1-From, GameState, Value1),
     move(GameState, From-To, NewGameState),
@@ -177,11 +183,25 @@ value(GameState, From-To, Value):-
     check_value(C2-N2-To, NewGameState, Value2),
     Value is Value2 - Value1.
 
+% value(+GameState, +Player, -Value)
+% Calcula a soma do valor de ligações adjacentes de todas as peças de um jogador num certo estado de jogo
+value(GameState, Player, Value):-
+    value(GameState, Player, 0, Value, 0).
+value(_,_,AuxValue, AuxValue,16):-!.
+value(GameState, Player, AuxValue, RValue, Index):-
+    select(Player-Index-Pos, GameState,_),
+    check_value(Player-Index-Pos,GameState,Value1),
+    Sum is AuxValue + Value1,
+    Index1 is Index + 1,
+    value(GameState,Player,Sum,RValue,Index1).
+
+% best_move(-Move, +GameState, +Moves, +Player)
+% escolhe o movimento do computador que tem o menor aumento do valor da peça, quanto menor o aumento mais jogadas deverá levar a ficar sem movimentos
 best_move(Move, GameState, Moves, Player):-
     best_move(Move, GameState, Moves, 1000, _, Player).
 best_move(Move, _, [], _, Move, _).
 best_move(Move, GameState, [H|T], Min, _, Player):-
-    value(GameState, H, Value),
+    evaluate_move(GameState, H, Value),
     Value < Min, !,
     best_move(Move, GameState, T, Value, H, Player).
 best_move(Move, GameState, [_|T], Min, CurrentMove, _):-
