@@ -3,19 +3,22 @@
 
 
 % move(+GameState, +Move, -NewGameState)
-% Validação e execução de uma jogada, obtendo o novo estado do jogo
+% Execução de uma jogada, obtendo o novo estado do jogo
 move(GameState, From-To, NewGameState):-
     select(C-I-From,GameState,Rest),
     append(Rest,[C-I-To], NewGameState).
 
 % valid_moves(+GameState, -ListOfMoves, +PLayer)
-% Obtenção de lista com jogadas possíveis
+% Obtenção da lista com as jogadas possíveis para um determinado jogador
 valid_moves(GameState, ListOfMoves,1):-
     create_move_list(GameState, ListOfMoves, [], r,0),!.
 
 valid_moves(GameState, ListOfMoves,2):-
     create_move_list(GameState, ListOfMoves, [], b,0),!.
 
+% create_move_list(+GameState,-ListOfMoves,+List,+Player,+Index)
+% Predicado auxiliar de valid_moves que cria a lista de jogadas com diferença de utilizar uma lista e indice auxiliares e o Player é um caracter 'r' ou 'b' em vez de um int (esta última é puramente uma questão de facilitar o acesso á lista de GameState)
+%  Precorre as 16 peças do jogador e adiciona os movimentos possiveis de cada peça
 create_move_list(_, ListOfMoves,ListOfMoves, _,16):-!.
 create_move_list(GameState,ListOfMoves,List,Player,Index):-
     select(Player-Index-N,GameState,_),
@@ -25,6 +28,9 @@ create_move_list(GameState,ListOfMoves,List,Player,Index):-
     create_move_list(GameState,ListOfMoves,List1,Player,Index1).
 
 
+% check_move(+GameState, +Color-_-Position, ?List)
+% Adiciona á lista List todas as jogadas possíveis para uma determinada peça tendo em conta a sua cor e posição
+% Para tal utiliza outros 4 predicados auxiliares que fazem a verificação da jogada e, se permitido, adiciona á lista essa jogada
 check_move(GameState,C-_-N,List):-
     check_move_up(GameState,C-_-N,L1),
     check_move_down(GameState,C-_-N,L2),
@@ -76,12 +82,19 @@ check_move_right(_,_-_-N,List):-
     N1 is N+1,
     append([],[N-N1],List).
 
+% Verifica a validade de um movimento de uma peça para a nova posição NewPos por comparação dos valores da peça na posição atual e nova posição
+% Apenas jogadas que aumentem o valor de "orthogonal friendly connections" da peça (definido nas regras) são autorizadas
+% check_move_validity(+GameState, +Color-_-OldPos, +NewPos)
 check_move_validity(GameState,C-_-N, Pos):-
     \+ select(_-_-Pos,GameState,_),
     check_value(C-_-N,GameState,Value1),
     check_value(C-_-Pos,GameState,Value2),
     Value2 > Value1 + 1.
 
+
+% Verifica o valor de uma determinada peça tendo em conta a sua cor e posição, o valor é posteriormente usado para determinar a validade de um movimento
+% Utiliza outros 4 predicados auxiliares para fazer a verificação nas 4 direções ortogonais
+% check_value(+Color-_-Position,+GameState,-Value)
 check_value(C-_-N,GameState, Value):-
     check_value_up(C-_-N,GameState,Value1),
     check_value_down(C-_-N,GameState,Value2),
@@ -129,6 +142,8 @@ check_value_right(C-_-N,GameState, Value):-
     select(Color-_-Pos,GameState,_),
     check_color(C,Color,Value,0).
 
+% check_color(+Color1,+Color2,-Value,+Old)
+% Incrementa o valor de Old para Value se Color1 e Color2 forem iguais, senão decrementa
 check_color(C,C,Value,Old):-
     Value is Old + 1, !.
 
@@ -136,13 +151,13 @@ check_color(_,_,Value,Old):-
     Value is Old - 1.
 
 
-% game_over(+GameState, -Winner)
-% Verificação da situação de fim do jogo, com identificação do vencedor
+% game_over(+GameState, +Player)
+% Verificação da situação de fim do jogo para o jogador da presente jogada (pelas regras do jogo assume-se a vitória do adversário se o jogador não tiver movimentos possíveis)
 game_over(GameState, Player):-
     valid_moves(GameState,List,Player),
     \+ select(_-_,List,_).
 
-% choose_move(+GameState, +Level, -Move)
+% choose_move(+GameState, +Level, -Move, -Player)
 % Escolha da jogada a efetuar pelo computador, dependendo do nível de dificuldade
 choose_move(GameState, 1, Move, Player):-
     valid_moves(GameState, Moves, Player),
